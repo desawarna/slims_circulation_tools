@@ -46,6 +46,20 @@ $max_chars = 1024*100; // SLiMS Biblio max_char standard
 if (!$can_read) {
   die('<div class="errorBox">'.__('You are not authorized to view this section').'</div>');
 }
+
+// Empty checking
+function emptyChecking($value) {
+	global $dbs;
+	 if ($value == '') {
+		$value = 'NULL';
+		return $value;
+	 } else {
+	 	$value = str_replace('"', '', $value);
+	 	$value = $dbs->escape_string($value);
+	 	return "'".$value."'";
+	 }
+}
+
 //Export
 if (isset($_POST['doImport'])) {
 	$file = $_FILES['importFile']['tmp_name'];
@@ -74,12 +88,12 @@ if (isset($_POST['doImport'])) {
 			// Insert
 	        $insert = $dbs->query("INSERT INTO fines VALUES
 	            (
-	                '".$dbs->escape_string($data[0])."',
-	                '".$dbs->escape_string($data[1])."',
-	                '".$dbs->escape_string($data[2])."',
-	                '".$dbs->escape_string($data[3])."',
-	                '".$dbs->escape_string($data[4])."',
-	                '".$dbs->escape_string($data[5])."'
+	                ".emptyChecking($data[0]).",
+	                ".emptyChecking($data[1]).",
+	                ".emptyChecking($data[2]).",
+	                ".emptyChecking($data[3]).",
+	                ".emptyChecking($data[4]).",
+	                ".emptyChecking($data[5])."
 	            )
 	        ");
 	        // Check insert
