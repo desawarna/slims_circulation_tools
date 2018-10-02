@@ -18,7 +18,7 @@
  *
  */
 
-/* Fines Import section */
+/* Loan Import section */
 
 // key to authenticate
 define('INDEX_AUTH', '1');
@@ -46,6 +46,20 @@ $max_chars = 1024*100; // SLiMS Biblio max_char standard
 if (!$can_read) {
   die('<div class="errorBox">'.__('You are not authorized to view this section').'</div>');
 }
+
+// Empty checking
+function emptyChecking($value) {
+	global $dbs;
+	 if ($value == '') {
+		$value = 'NULL';
+		return $value;
+	 } else {
+	 	$value = str_replace('"', '', $value);
+	 	$value = $dbs->escape_string($value);
+	 	return "'".$value."'";
+	 }
+}
+
 //Export
 if (isset($_POST['doImport'])) {
 	$file = $_FILES['importFile']['tmp_name'];
@@ -65,29 +79,33 @@ if (isset($_POST['doImport'])) {
 	}
 	// Start Time to count query speed
 	$starttime = microtime(true);
+	//$insert = ''; // for debugging only
 	//loop through the csv file and insert into database
 	while ($data = fgetcsv($handle, $maxLine, $separator, $enclosure)) {
 		// Check
 		if ($data[0]) {
 			// Insert
-	        $insert = $dbs->query("INSERT INTO loan VALUES
+			// For debugging
+	        // $insert .= "INSERT INTO loan VALUES 
+	        $insert  = $dbs->query("INSERT INTO loan VALUES
 	            (
-	                '".$dbs->escape_string($data[0])."',
-	                '".$dbs->escape_string($data[1])."',
-	                '".$dbs->escape_string($data[2])."',
-	                '".$dbs->escape_string($data[3])."',
-	                '".$dbs->escape_string($data[4])."',
-	                '".$dbs->escape_string($data[5])."',
-	                '".$dbs->escape_string($data[6])."',
-	                '".$dbs->escape_string($data[7])."',
-	                '".$dbs->escape_string($data[8])."',
-	                '".$dbs->escape_string($data[9])."',
-	                '".$dbs->escape_string($data[10])."',
-	                '".$dbs->escape_string($data[11])."',
-	                '".$dbs->escape_string($data[12])."',
-	                '".$dbs->escape_string($data[13])."'
+	                ".emptyChecking($data[0]).",
+	                ".emptyChecking($data[1]).",
+	                ".emptyChecking($data[2]).",
+	                ".emptyChecking($data[3]).",
+	                ".emptyChecking($data[4]).",
+	                ".emptyChecking($data[5]).",
+	                ".emptyChecking($data[6]).",
+	                ".emptyChecking($data[7]).",
+	                ".emptyChecking($data[8]).",
+	                ".emptyChecking($data[9]).",
+	                ".emptyChecking($data[10]).",
+	                ".emptyChecking($data[11]).",
+	                ".emptyChecking($data[12]).",
+	                ".emptyChecking($data[13])."
 	            )
 	        ");
+	        // "."\n"; // for debugging
 	        // Check insert
 	        if ($insert) {
 	        	$inserted++;
@@ -101,7 +119,9 @@ if (isset($_POST['doImport'])) {
 	// Calculates total time taken
 	$duration = $endtime - $starttime;
 	$duration = substr($duration, 0,5);
-	utility::jsAlert('Berhasil memasukan : '.$inserted.' data dari '.$num.' antrian data dalam '.$duration.' detik');
+    utility::jsAlert('Berhasil memasukan : '.$inserted.' data dari '.$num.' antrian data dalam '.$duration.' detik');
+	//utility::jsAlert($insert);
+	// file_put_contents(UPLOAD.'coba.sql', $insert); // for debugging only
 	echo '<script type="text/javascript">parent.$(\'#importFile\').val(\'\');</script>';
 	exit();
 }
